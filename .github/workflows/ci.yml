@@ -1,0 +1,34 @@
+name: Public Library CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  public-library-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify required MIT packages and checksums
+        run: |
+          set -euo pipefail
+          for f in \
+            LICENSE \
+            README.md \
+            SHA256SUMS \
+            Components/NOORTECH-UI-Kit/LICENSE.md \
+            Templates/Responsive-Landing-Page/LICENSE.md \
+            Source-Code/NOORTECH-Task-List/LICENSE.md \
+            Images-Icons/NOORTECH-SVG-Icon-Pack/LICENSE.md; do
+            test -f "$f"
+          done
+          sha256sum -c SHA256SUMS
